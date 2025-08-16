@@ -8,6 +8,11 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 from SqlServerDB import SqlServerDB
 from datetime import datetime
+from SqlServerDB import SqlServerDB
+from sqlhelper import SqlHelper
+from sqlhelper import SqlParameter
+
+
 
 
 handler = TimedRotatingFileHandler(
@@ -91,32 +96,24 @@ class MyWindow(QWidget):
         time_str = now.strftime("%y%m%d%H%M%S")
 
 
-        db = SqlServerDB()
+        db = SqlHelper()
 
         try:
 
-            params_list = [
-              {"UPD_USR": 777, "LOG_KEY": 10000061},
-              {"UPD_USR": 888, "LOG_KEY": 10000062}
-                ]
+            db.transaction([
+            ("update TRN_LOG set UPD_USR=:UPD_USR where LOG_KEY =:LOG_KEY"
+             , [
+                 SqlParameter("LOG_KEY", 10000061)
+                ,SqlParameter("UPD_USR", 777)
+                ]),
+            ("update TRN_LOG set UPD_USR=:UPD_USR where LOG_KEY =:LOG_KEY"
+             , [
+                 SqlParameter("UPD_USR", 888)
+                ,SqlParameter("LOG_KEY", 10000062)
+                ]),
+            ])
 
-
-            db.connect()
-            ke= db.execute_many_named("UPDATE TRN_LOG SET UPD_USR=:UPD_USR WHERE LOG_KEY=:LOG_KEY",params_list)
-
-            time_str1="88891"
-            time_str2="++'+2"
-
-
-            params_list = [
-              {"UPD_USR": time_str1, "LOG_KEY": 10000061},
-              {"UPD_USR": time_str2, "LOG_KEY": 10000062}
-                ]
-
-            db.commit()
-
-        except Exception as e:
-            db.rollback()
+        except Exception as e:          
             print("❌ 事务提交失败:", e)
         finally:
             db.close()

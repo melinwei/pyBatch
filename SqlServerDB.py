@@ -117,6 +117,19 @@ class SqlServerDB:
             raise
         finally:
             cursor.close()
+
+    def execute(self, sql: str, params_list: List[SqlParameter]) -> int:
+        """批量执行 SQL 语句"""
+        self.connect()
+        cursor = self.conn.cursor()
+        try:
+            cursor.executemany(sql, params_list)
+            affected_rows = cursor.rowcount
+            return affected_rows
+        except pyodbc.Error as e:
+            raise
+        finally:
+            cursor.close()        
             
     def execute_many(self, sql: str, params_list: List[Union[Tuple, List, Dict]]) -> int:
         """批量执行 SQL 语句"""
