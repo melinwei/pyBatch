@@ -2,7 +2,7 @@ import pyodbc
 from typing import Optional, List, Dict, Any, Tuple, Union
 from dataclasses import dataclass
 import re
-from common_code import CommonCode
+from common.common_code import CommonCode
 import pandas as pd
 
 @dataclass

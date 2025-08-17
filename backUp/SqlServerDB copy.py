@@ -1,7 +1,7 @@
 import pyodbc
 from contextlib import contextmanager
 from typing import Optional, List, Dict, Any, Tuple, Union
-from common_code import CommonCode
+from common.common_code import CommonCode
 from dataclasses import dataclass
 from typing import Any
 

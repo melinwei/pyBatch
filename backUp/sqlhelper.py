@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Any, List, Optional
 import pyodbc
 import re
-from common_code import ConfigManager
+from common.common_code import ConfigManager
 
 @dataclass
 class SqlParameter:

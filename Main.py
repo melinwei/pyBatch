@@ -4,10 +4,10 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget, QLabel, QLineEdit, QDateEdit, QPushButton, QGridLayout, QMessageBox, QDesktopWidget
 )
 from PyQt5.QtCore import QDate,Qt
-from common_code import CommonCode
+from common.common_code import CommonCode
 import logging
 from logging.handlers import TimedRotatingFileHandler
-from sqlserverdb import SqlServerDB,SqlParameter
+from common.sqlserverdb import SqlServerDB,SqlParameter
 
 
 OutLog = CommonCode.get_logger()

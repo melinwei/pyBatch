@@ -34,23 +34,46 @@ class CommonCode:
     
     _logger = None
     @classmethod
-    def init_logger(cls, log_file='applog.log', level=logging.INFO, backup_count=7):
+    def init_logger(cls, log_file='appLog.log', level=logging.INFO, backup_count=7, base_log_dir='log'):
+        """
+        初始化日志器，将日志文件保存到按日期命名的文件夹中
+        
+        Args:
+            log_file: 日志文件名，默认 'applog.log'
+            level: 日志级别，默认 logging.INFO
+            backup_count: 备份文件数量，默认 7
+            base_log_dir: 基础日志目录，默认 'log'
+        """
         logger = logging.getLogger("CommonLogger")
         logger.setLevel(level)
+    
         if not logger.handlers:
+            # 获取当前日期作为文件夹名
+            today = datetime.now().strftime('%Y%m%d')
+            log_dir = os.path.join(base_log_dir, today)
+            
+            # 创建日期文件夹（如果不存在）
+            os.makedirs(log_dir, exist_ok=True)
+            
+            # 完整的日志文件路径
+            log_path = os.path.join(log_dir, log_file)
+            
             handler = TimedRotatingFileHandler(
-                filename=log_file,
+                filename=log_path,
                 when='D',
                 interval=1,
                 backupCount=backup_count,
                 encoding='utf-8'
             )
+            
             formatter = logging.Formatter(
                 '%(asctime)s [%(threadName)s] %(levelname)s: %(message)s',
                 datefmt='%Y-%m-%d %H:%M:%S'
             )
+            
             handler.setFormatter(formatter)
             logger.addHandler(handler)
+        
         cls._logger = logger
         return logger
 
