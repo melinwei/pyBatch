@@ -141,7 +141,7 @@ class SqlServerDB:
         return pd.DataFrame(data)
 
     def fetch_all_json(self, sql: str, params: Optional[Union[List[SqlParameter], Tuple, List, Dict]] = None) -> List[Dict[str, Any]]:
-         df = self.fetch_all_pd(sql, params)
+         df = self.fetch_all_data(sql, params)
          return df.to_json(orient='records', force_ascii=False)  #
 
 
