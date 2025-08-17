@@ -7,12 +7,12 @@ import pandas as pd
 
 
 @dataclass
-class SqlParameter:
+class MsSqlParameter:
     param_name: str
     param_value: Any
 
 
-class SqlServerDB:
+class MsSqlDataBase:
     """SQL Server 数据库操作类，支持自动提交和显式事务"""
 
     def __init__(self, connection_timeout: int = 30):
@@ -70,7 +70,7 @@ class SqlServerDB:
         self.in_transaction = False
 
     # ---------- 参数处理 ----------
-    def _convert_named_params(self, sql: str, params: List[SqlParameter]) -> Tuple[str, List[Any]]:
+    def _convert_named_params(self, sql: str, params: List[MsSqlParameter]) -> Tuple[str, List[Any]]:
         if not params:
             return sql, []
         param_dict = {p.param_name: p.param_value for p in params}
@@ -81,16 +81,16 @@ class SqlServerDB:
         return converted_sql, param_values
 
     def _process_parameters(
-        self, sql: str, params: Optional[Union[List[SqlParameter], Tuple, List, Dict]]
+        self, sql: str, params: Optional[Union[List[MsSqlParameter], Tuple, List, Dict]]
     ) -> Tuple[str, Optional[Union[Tuple, List, Dict]]]:
         if params is None:
             return sql, None
-        if isinstance(params, list) and params and isinstance(params[0], SqlParameter):
+        if isinstance(params, list) and params and isinstance(params[0], MsSqlParameter):
             return self._convert_named_params(sql, params)
         return sql, params
 
     # ---------- 执行 ----------
-    def execute(self, sql: str, params: Optional[Union[List[SqlParameter], Tuple, List, Dict]] = None) -> int:
+    def execute(self, sql: str, params: Optional[Union[List[MsSqlParameter], Tuple, List, Dict]] = None) -> int:
         self.connect()
         cursor = self.conn.cursor()
         try:
@@ -106,7 +106,7 @@ class SqlServerDB:
         finally:
             cursor.close()
 
-    def fetch_one(self, sql: str, params: Optional[Union[List[SqlParameter], Tuple, List, Dict]] = None) -> Optional[Dict[str, Any]]:
+    def fetch_one(self, sql: str, params: Optional[Union[List[MsSqlParameter], Tuple, List, Dict]] = None) -> Optional[Dict[str, Any]]:
         self.connect()
         cursor = self.conn.cursor()
         try:
@@ -120,7 +120,7 @@ class SqlServerDB:
         finally:
             cursor.close()
 
-    def fetch_all(self, sql: str, params: Optional[Union[List[SqlParameter], Tuple, List, Dict]] = None) -> List[Dict[str, Any]]:
+    def fetch_all(self, sql: str, params: Optional[Union[List[MsSqlParameter], Tuple, List, Dict]] = None) -> List[Dict[str, Any]]:
         self.connect()
         cursor = self.conn.cursor()
         try:
@@ -134,21 +134,21 @@ class SqlServerDB:
         finally:
             cursor.close()
 
-    def fetch_all_data(self, sql: str, params: Optional[Union[List[SqlParameter], Tuple, List, Dict]] = None) -> pd.DataFrame:
+    def fetch_all_data(self, sql: str, params: Optional[Union[List[MsSqlParameter], Tuple, List, Dict]] = None) -> pd.DataFrame:
         """查询多行数据并返回 pandas DataFrame"""
         data = self.fetch_all(sql, params)
         if not data:
             return pd.DataFrame()  # 空表
         return pd.DataFrame(data)
 
-    def fetch_all_json(self, sql: str, params: Optional[Union[List[SqlParameter], Tuple, List, Dict]] = None) -> List[Dict[str, Any]]:
+    def fetch_all_json(self, sql: str, params: Optional[Union[List[MsSqlParameter], Tuple, List, Dict]] = None) -> List[Dict[str, Any]]:
          df = self.fetch_all_data(sql, params)
          return df.to_json(orient='records', force_ascii=False)  #
 
 
 # 使用示例
 if __name__ == "__main__":
-    db = SqlServerDB()
+    db = MsSqlDataBase()
     try:
         # --- 自动提交模式（没调用 begin_transaction）---
         db.execute("INSERT INTO TRN_LOG (LOG_KEY, UPD_USR) VALUES (?, ?)", ("100", "auto"))

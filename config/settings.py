@@ -15,21 +15,6 @@ class Settings:
     # 应用信息
     APP_NAME: str = "YorkIY Batch With Python"
     APP_VERSION: str = "1.0.1"
-    
-
-     # 邮件配置
-    MAIL_SERVER: str = os.getenv("MAIL_SERVER", "smtp.gmail.com")
-    MAIL_PORT: int = int(os.getenv("MAIL_PORT", "587"))
-    MAIL_USE_TLS: bool = os.getenv("MAIL_USE_TLS", "True").lower() == "true"
-    MAIL_USERNAME: str = os.getenv("MAIL_USERNAME", "")
-    MAIL_PASSWORD: str = os.getenv("MAIL_PASSWORD", "")
-    MAIL_FROM: str = os.getenv("MAIL_FROM", "noreply@example.com")
-
-    # 文件上传配置
-    UPLOAD_FOLDER: str = os.path.join(BASE_DIR, "uploads")
-    MAX_CONTENT_LENGTH: int = 16 * 1024 * 1024  # 16MB
-    ALLOWED_EXTENSIONS: set = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
-
 
     _config_file = "config.ini"
     _config = None
@@ -58,19 +43,9 @@ class Settings:
 
     _logger = None
     @classmethod
-    def init_logger(cls, log_file='appLog.log', level=logging.INFO, backup_count=7, base_log_dir='log'):
-        """
-        初始化日志器，将日志文件保存到按日期命名的文件夹中
-        
-        Args:
-            log_file: 日志文件名，默认 'applog.log'
-            level: 日志级别，默认 logging.INFO
-            backup_count: 备份文件数量，默认 7
-            base_log_dir: 基础日志目录，默认 'log'
-        """
+    def init_logger(cls, log_file='appLog.log', level=logging.INFO, backup_count=7, base_log_dir='logs'):
         logger = logging.getLogger("CommonLogger")
-        logger.setLevel(level)
-    
+        logger.setLevel(level)    
         if not logger.handlers:
             # 获取当前日期作为文件夹名
             today = datetime.now().strftime('%Y%m%d')

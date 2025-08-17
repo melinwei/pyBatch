@@ -4,13 +4,16 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget, QLabel, QLineEdit, QDateEdit, QPushButton, QGridLayout, QMessageBox, QDesktopWidget
 )
 from PyQt5.QtCore import QDate,Qt
-from common.common_code import CommonCode
-import logging
-from logging.handlers import TimedRotatingFileHandler
-from common.sqlserverdb import SqlServerDB,SqlParameter
 
 
-OutLog = CommonCode.get_logger()
+from config.settings import Settings
+from config.database import MsSqlDataBase,MsSqlParameter
+
+
+
+
+OutLog = Settings.get_logger()
+
 
 
 
@@ -76,20 +79,21 @@ class MyWindow(QWidget):
 
     def on_login(self):     
 
-        OutLog.info("def on_login(self)") 
+        OutLog.info(Settings.APP_NAME) 
 
 
         now = datetime.now()
         time_str = now.strftime("%y%m%d%H%M%S")
 
 
-        db = SqlServerDB()
+        db = MsSqlDataBase()
+        
 
         try:
             db.begin_transaction()
             params = [
-            SqlParameter("UPD_USR", "881"),
-            SqlParameter("LOG_KEY", "10000061")
+            MsSqlParameter("UPD_USR", "881"),
+            MsSqlParameter("LOG_KEY", "10000061")
           ]
             sql = "SELECT TOP 10 * FROM  TRN_LOG "
             query = """
