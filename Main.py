@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QLabel, QLineEdit, QDateEdit, QPushButton, QGridLayout, QMessageBox, QDesktopWidget
 )
@@ -6,13 +7,7 @@ from PyQt5.QtCore import QDate,Qt
 from Config_manager import ConfigManager
 import logging
 from logging.handlers import TimedRotatingFileHandler
-from SqlServerDB import SqlServerDB
-from datetime import datetime
-from SqlServerDB import SqlServerDB
-from sqlhelper import SqlHelper
-from sqlhelper import SqlParameter
-
-
+from sqlserverdb import SqlServerDB,SqlParameter
 
 
 handler = TimedRotatingFileHandler(
@@ -96,28 +91,35 @@ class MyWindow(QWidget):
         time_str = now.strftime("%y%m%d%H%M%S")
 
 
-        db = SqlHelper()
+        db = SqlServerDB()
 
         try:
+            db.begin_transaction()
+            params = [
+            SqlParameter("UPD_USR", "881"),
+            SqlParameter("LOG_KEY", "10000061")
+          ]
+            sql = "SELECT TOP 10 * FROM  TRN_LOG "
+            query = """
+                    SELECT id, name, email
+                    FROM users
+                    WHERE status = ?
+                    ORDER BY created_at DESC
+                    """
+            
+            affected_rows = db.fetch_all_json(sql)
+            print(f"更新了 {affected_rows} 行")
+            db.commit()            
 
-            db.transaction([
-            ("update TRN_LOG set UPD_USR=:UPD_USR where LOG_KEY =:LOG_KEY"
-             , [
-                 SqlParameter("LOG_KEY", 10000061)
-                ,SqlParameter("UPD_USR", 777)
-                ]),
-            ("update TRN_LOG set UPD_USR=:UPD_USR where LOG_KEY =:LOG_KEY"
-             , [
-                 SqlParameter("UPD_USR", 888)
-                ,SqlParameter("LOG_KEY", 10000062)
-                ]),
-            ])
-
-        except Exception as e:          
+        except Exception as e:
+            db.rollback()          
             print("❌ 事务提交失败:", e)
-        finally:
-            db.close()
 
+        finally:
+            db.close()    
+
+
+     
         handler.setFormatter(formatter)
 
         logger = logging.getLogger('mydiary')
