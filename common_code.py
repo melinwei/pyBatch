@@ -34,7 +34,7 @@ class CommonCode:
     
     _logger = None
     @classmethod
-    def init_logger(cls, log_file='mydiary2.log', level=logging.INFO, backup_count=7):
+    def init_logger(cls, log_file='applog.log', level=logging.INFO, backup_count=7):
         logger = logging.getLogger("CommonLogger")
         logger.setLevel(level)
         if not logger.handlers:
