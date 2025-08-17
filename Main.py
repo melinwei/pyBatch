@@ -87,7 +87,7 @@ class MyWindow(QWidget):
 
 
         db = MsSqlDataBase()
-        
+
 
         try:
             db.begin_transaction()
@@ -103,7 +103,7 @@ class MyWindow(QWidget):
                     ORDER BY created_at DESC
                     """
             
-            affected_rows = db.fetch_all_json(sql)
+            affected_rows = db.fetch_all_data(sql)
             print(f"更新了 {affected_rows} 行")
             db.commit()            
 
@@ -118,7 +118,7 @@ class MyWindow(QWidget):
         uid = self.input_id.text()
         uname = self.input_name.text()
         birth = self.input_birth.date().toString("yyyy-MM-dd")
-        QMessageBox.information(self, "登录信息", f"用户ID: {uid}\n用户名: {uname}\n生日: {birth}{conn_str}")
+        QMessageBox.information(self, "登录信息", f"用户ID: {uid}\n用户名: {uname}\n生日: {birth}{time_str}")
 
 
 if __name__ == "__main__":
