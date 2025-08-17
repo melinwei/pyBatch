@@ -2,10 +2,8 @@ import pyodbc
 from typing import Optional, List, Dict, Any, Tuple, Union
 from dataclasses import dataclass
 import re
-from Config_manager import ConfigManager
+from common_code import CommonCode
 import pandas as pd
-import json
-
 
 @dataclass
 class SqlParameter:
@@ -17,7 +15,7 @@ class SqlServerDB:
     """SQL Server 数据库操作类，支持自动提交和显式事务"""
 
     def __init__(self, connection_timeout: int = 30):
-        self.connection_string = ConfigManager.get_connection_string()
+        self.connection_string = CommonCode.get_connection_string()
         self.connection_timeout = connection_timeout
         self.conn = None
         self.in_transaction = False  # 标记是否手动开启了事务
@@ -135,7 +133,7 @@ class SqlServerDB:
         finally:
             cursor.close()
 
-    def fetch_all_pd(self, sql: str, params: Optional[Union[List[SqlParameter], Tuple, List, Dict]] = None) -> pd.DataFrame:
+    def fetch_all_data(self, sql: str, params: Optional[Union[List[SqlParameter], Tuple, List, Dict]] = None) -> pd.DataFrame:
         """查询多行数据并返回 pandas DataFrame"""
         data = self.fetch_all(sql, params)
         if not data:

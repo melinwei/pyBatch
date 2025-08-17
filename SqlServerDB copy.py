@@ -1,7 +1,7 @@
 import pyodbc
 from contextlib import contextmanager
 from typing import Optional, List, Dict, Any, Tuple, Union
-from Config_manager import ConfigManager
+from common_code import CommonCode
 from dataclasses import dataclass
 from typing import Any
 
@@ -14,7 +14,7 @@ class SqlParameffter:
 class SqlServerDB:
     """SQL Server 数据库连接管理类，支持连接池和事务管理"""    
     def __init__(self, pool_size: int = 10, connection_timeout: int = 30):
-        self.connection_string = ConfigManager.get_connection_string()
+        self.connection_string = CommonCode.get_connection_string()
         self.pool_size = pool_size
         self.connection_timeout = connection_timeout
         self.conn = None       

@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [    
+        {
+            "name": "Python: Python Main",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Main.py",   // 这里应该是 program，不是 script
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

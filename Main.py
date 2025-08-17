@@ -4,24 +4,13 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget, QLabel, QLineEdit, QDateEdit, QPushButton, QGridLayout, QMessageBox, QDesktopWidget
 )
 from PyQt5.QtCore import QDate,Qt
-from Config_manager import ConfigManager
+from common_code import CommonCode
 import logging
 from logging.handlers import TimedRotatingFileHandler
 from sqlserverdb import SqlServerDB,SqlParameter
 
 
-handler = TimedRotatingFileHandler(
-    filename='mydiary.log',
-    when='D',           # 按天分割
-    interval=1,
-    backupCount=7,
-    encoding='utf-8'
-)
-
-formatter = logging.Formatter(
-    '%(asctime)s [%(threadName)s] %(levelname)s: %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
+OutLog = CommonCode.get_logger()
 
 
 
@@ -85,7 +74,10 @@ class MyWindow(QWidget):
         
         
 
-    def on_login(self):      
+    def on_login(self):     
+
+        OutLog.info("def on_login(self)") 
+
 
         now = datetime.now()
         time_str = now.strftime("%y%m%d%H%M%S")
@@ -116,25 +108,9 @@ class MyWindow(QWidget):
             print("❌ 事务提交失败:", e)
 
         finally:
-            db.close()    
-
+            db.close()  
 
      
-        handler.setFormatter(formatter)
-
-        logger = logging.getLogger('mydiary')
-        logger.setLevel(logging.INFO)
-        logger.addHandler(handler)
-
-        conn_str = ConfigManager.get_connection_string()
-
-        logger.info(conn_str)
-
-
-       
-        logger.info('今天记录了一条日22记11')
-        logger.info('米ロ首脳会談始33まる11、ウクライナ停戦へ協議握手であいさつロイター')
-
         uid = self.input_id.text()
         uname = self.input_name.text()
         birth = self.input_birth.date().toString("yyyy-MM-dd")
