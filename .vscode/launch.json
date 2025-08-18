@@ -5,7 +5,7 @@
             "name": "Python: Python Main",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/Main.py",   // 这里应该是 program，不是 script
+            "program": "${workspaceFolder}/Main.py",
             "args": [],
             "cwd": "${workspaceFolder}"
         }
