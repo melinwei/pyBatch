@@ -1,0 +1,82 @@
+# =========================================
+# Database Settings
+# =========================================
+[database]
+server = "10.240.0.241\\COSMOS01"
+port = 1433
+database = "AutoPublic"
+username = "sa"
+password = "Data5816Trade8205!"
+driver = "ODBC Driver 17 for SQL Server"
+trust_certificate = true
+connection_timeout = 60
+
+
+# =========================================
+# FTP Settings
+# =========================================
+
+[ftpinfo01]
+# Ftp接続先情報01 (SKYMART連携用)
+ftp_server = "ftp://10.240.0.235/debug/AZismWMS/"
+ftp_port = 21
+username = "ftp_user01"
+password = "Data5615Trade1240"
+use_tls = false
+passive_mode = false
+
+[ftpinfo02]
+# Ftp接続先情報02 (未使用)
+ftp_server = "ftp://10.240.0.235/debug/AZismWMS/"
+ftp_port = 21
+username = "ftp_user01"
+password = "Data5615Trade1240"
+use_tls = false
+passive_mode = false
+
+[ftpinfo03]
+# Ftp接続先情報03 (未使用)
+ftp_server = "ftp://10.240.0.235/debug/AZismWMS/"
+ftp_port = 21
+username = "ftp_user01"
+password = "Data5615Trade1240"
+use_tls = false
+passive_mode = false
+
+
+# =========================================
+# Email Settings
+# =========================================
+
+[emailinfo01]
+# メール送信サーバ01:仕入発注通信送信用
+smtp_server = "mail.data-trade.co.jp"
+smtp_port = 587
+username = "auto-message@data-trade.co.jp"
+password = "kj5raijr6"
+use_tls = false
+use_ssl = false
+sender_email = "auto-message@data-trade.co.jp"
+sender_name = "テスト"
+
+[emailinfo02]
+# メール送信サーバ02:未使用
+smtp_server = "mail.data-trade.co.jp"
+smtp_port = 587
+username = "auto-message@data-trade.co.jp"
+password = "kj5raijr6"
+use_tls = false
+use_ssl = false
+sender_email = "auto-message@data-trade.co.jp"
+sender_name = "テスト"
+
+[emailinfo03]
+# メール送信サーバ03:未使用
+smtp_server = "mail.data-trade.co.jp"
+smtp_port = 587
+username = "auto-message@data-trade.co.jp"
+password = "kj5raijr6"
+use_tls = false
+use_ssl = false
+sender_email = "auto-message@data-trade.co.jp"
+sender_name = "テスト"

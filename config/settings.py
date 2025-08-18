@@ -1,6 +1,7 @@
 import os
 import logging
 import configparser
+import toml
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
@@ -8,10 +9,15 @@ from pathlib import Path
 
 class Settings:
 
+    
+
     # 基础路径设置
     BASE_DIR = Path(__file__).resolve().parent.parent
     PROJECT_ROOT = BASE_DIR
-
+    config = toml.load("config.toml")
+    
+    
+    
     # 应用信息
     APP_NAME: str = "YorkIY Batch With Python"
     APP_VERSION: str = "1.0.1"
