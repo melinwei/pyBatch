@@ -22,11 +22,8 @@ class ModelEmailInfo:
     
     # 发送者信息
     sender_email: str = ''            # 发送者邮箱
-    sender_name: str = ''             # 发送者显示名称
-    
-    # 服务器类型
-    server_type: MailServerType = MailServerType.CUSTOM
+    sender_name: str = ''             # 发送者显示名称   
+
     
     # 配置名称
     config_name: str = ''             # 配置名称，便于管理
-    description: str = ''             # 配置描述
