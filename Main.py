@@ -10,7 +10,7 @@ from config.settings import Settings
 from config.database import MsSqlDataBase,MsSqlParameter
 
 from utils.ftpclient import ModelFtpInfo,FtpClient
-
+from utils.emailsender import ModelEmailInfo,EmailSender
 
 
 
@@ -79,7 +79,29 @@ class MyWindow(QWidget):
         
         
 
-    def on_login(self):     
+    def on_login(self):    
+
+
+        kMail=Settings.get_Email_Info_01()
+
+        send=EmailSender(kMail)
+
+        if send.test_connection():
+         print("连接测试成功！")
+        
+        # 发送带附件的邮件
+         success = send.send_email(
+            to_emails=["w_lin@data-trade.co.jp"],
+            subject="测试邮件",
+            body="这是纯文本内容",
+            html_body="<h1>这是HTML内容</h1><p>支持HTML格式</p>"
+        )
+         
+        if success:
+            print("邮件发送成功！")
+        else:
+            print("邮件发送失败！")
+
 
         k1=Settings.get_Ftp_Info_01()
 

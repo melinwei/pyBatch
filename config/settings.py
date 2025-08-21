@@ -6,6 +6,8 @@ from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 from utils.ftpclient import ModelFtpInfo
+from utils.emailsender import ModelEmailInfo
+
 
 
 
@@ -62,6 +64,20 @@ class Settings:
         config_name="テストFTP情報"
         )
         return ftp_info
+
+    @classmethod
+    def get_Email_Info_01(cls):
+        email_info = ModelEmailInfo(
+            smtp_server=cls.config['emailinfo01']['smtp_server'],
+            smtp_port=cls.config['emailinfo01']['smtp_port'],
+            username=cls.config['emailinfo01']['username'],
+            password=cls.config['emailinfo01']['password'],
+            use_tls=cls.config['emailinfo01']['use_tls'],
+            use_ssl=cls.config['emailinfo01']['use_ssl'],
+            sender_email=cls.config['emailinfo01']['sender_email'],
+            sender_name=cls.config['emailinfo01']['sender_name']    
+        )
+        return email_info
 
     _logger = None
     @classmethod
