@@ -9,6 +9,8 @@ from pathlib import Path
 
 
 
+
+
 class Settings:
 
     # App情報
@@ -49,12 +51,12 @@ class Settings:
     @classmethod
     def get_Ftp_Info(cls):
         ftp_info = ModelFtpInfo(
-        ftp_server="ftp://example.com",
-        ftp_port=21,
-        username="user",
-        password="pass",
-        use_tls=True,
-        passive_mode=False,
+        ftp_server=cls.config['ftpinfo01']['server'],
+        ftp_port=cls.config['ftpinfo01']['port'],
+        username=cls.config['ftpinfo01']['username'],
+        password=cls.config['ftpinfo01']['password'],
+        use_tls=cls.config['ftpinfo01']['use_tls'],
+        passive_mode=cls.config['ftpinfo01']['passive_mode'],
         timeout=60,
         remote_dir="/upload",
         local_dir="./downloads",
