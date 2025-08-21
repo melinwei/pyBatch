@@ -7,23 +7,23 @@ from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
 
+
+
 class Settings:
 
-    
-
-    # 基础路径设置
-    BASE_DIR = Path(__file__).resolve().parent.parent
-    PROJECT_ROOT = BASE_DIR
-    config = toml.load("config.toml")
-    
-    
-    
-    # 应用信息
+    # App情報
     APP_NAME: str = "YorkIY Batch With Python"
     APP_VERSION: str = "1.0.1"
 
+    # 基本フォルダ設定
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    PROJECT_ROOT = BASE_DIR
+    config = toml.load("config.toml")
     _config_file = "config.ini"
     _config = None
+
+    
+    
     @classmethod
     def load_config(cls):
         if cls._config is None:
@@ -45,7 +45,22 @@ class Settings:
             f"PWD={db_config['password']};"
             f"TrustServerCertificate={db_config['trust_certificate']};"
             f"Connection Timeout={db_config['connection_timeout']};"
-        )        
+        ) 
+    @classmethod
+    def get_Ftp_Info(cls):
+        ftp_info = ModelFtpInfo(
+        ftp_server="ftp://example.com",
+        ftp_port=21,
+        username="user",
+        password="pass",
+        use_tls=True,
+        passive_mode=False,
+        timeout=60,
+        remote_dir="/upload",
+        local_dir="./downloads",
+        config_name="测试配置"
+        )
+        return ftp_info
 
     _logger = None
     @classmethod
