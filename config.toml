@@ -18,12 +18,13 @@ connection_timeout = 60
 
 [ftpinfo01]
 # Ftp接続先情報01 (SKYMART連携用)
-ftp_server = "ftp://10.240.0.235/debug/AZismWMS/"
+ftp_server = "10.240.0.235"
 ftp_port = 21
 username = "ftp_user01"
 password = "Data5615Trade1240"
 use_tls = false
 passive_mode = false
+remote_dir="/debug/AZismWMS/"
 
 [ftpinfo02]
 # Ftp接続先情報02 (未使用)

@@ -5,7 +5,7 @@ import toml
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
-
+from utils.ftpclient import ModelFtpInfo
 
 
 
@@ -49,18 +49,17 @@ class Settings:
             f"Connection Timeout={db_config['connection_timeout']};"
         ) 
     @classmethod
-    def get_Ftp_Info(cls):
+    def get_Ftp_Info_01(cls):
         ftp_info = ModelFtpInfo(
-        ftp_server=cls.config['ftpinfo01']['server'],
-        ftp_port=cls.config['ftpinfo01']['port'],
+        ftp_server=cls.config['ftpinfo01']['ftp_server'],
+        ftp_port=cls.config['ftpinfo01']['ftp_port'],
         username=cls.config['ftpinfo01']['username'],
         password=cls.config['ftpinfo01']['password'],
         use_tls=cls.config['ftpinfo01']['use_tls'],
         passive_mode=cls.config['ftpinfo01']['passive_mode'],
+        remote_dir=cls.config['ftpinfo01']['remote_dir'],
         timeout=60,
-        remote_dir="/upload",
-        local_dir="./downloads",
-        config_name="测试配置"
+        config_name="テストFTP情報"
         )
         return ftp_info
 

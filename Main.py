@@ -9,6 +9,8 @@ from PyQt5.QtCore import QDate,Qt
 from config.settings import Settings
 from config.database import MsSqlDataBase,MsSqlParameter
 
+from utils.ftpclient import ModelFtpInfo,FtpClient
+
 
 
 
@@ -78,6 +80,22 @@ class MyWindow(QWidget):
         
 
     def on_login(self):     
+
+        k1=Settings.get_Ftp_Info_01()
+
+
+
+        client = FtpClient(k1)
+        if client.connect():
+            client.upload_string("fff","kkke.txt")
+            
+
+
+
+
+
+        OutLog.info(f"FTP信息: {k1}")
+
 
         OutLog.info(Settings.APP_NAME) 
 
