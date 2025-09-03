@@ -1,10 +1,14 @@
+"""Settings configuration module for the YorkIY Batch application."""
+
 import os
 import logging
 import configparser
-import toml
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
+
+import toml
+
 from utils.ftpclient import ModelFtpInfo
 from utils.emailsender import ModelEmailInfo
 
@@ -15,7 +19,7 @@ from utils.emailsender import ModelEmailInfo
 
 class Settings:
 
-    # App情報
+    # アプリ情報
     APP_NAME: str = "YorkIY Batch With Python"
     APP_VERSION: str = "1.0.1"
 
@@ -35,7 +39,7 @@ class Settings:
                 cls._config = configparser.ConfigParser()
                 cls._config.read(cls._config_file, encoding='utf-8')
             else:
-                raise FileNotFoundError(f"❌ 配置文件 {cls._config_file} 不存在")
+                raise FileNotFoundError(f"❌ 設定ファイル {cls._config_file} が存在しません")
             
     @classmethod
     def get_connection_string(cls):
@@ -85,14 +89,14 @@ class Settings:
         logger = logging.getLogger("CommonLogger")
         logger.setLevel(level)    
         if not logger.handlers:
-            # 获取当前日期作为文件夹名
+            # 現在の日付をフォルダ名として取得
             today = datetime.now().strftime('%Y%m%d')
             log_dir = os.path.join(base_log_dir, today)
             
-            # 创建日期文件夹（如果不存在）
+            # 日付フォルダを作成（存在しない場合）
             os.makedirs(log_dir, exist_ok=True)
             
-            # 完整的日志文件路径
+            # 完全なログファイルパス
             log_path = os.path.join(log_dir, log_file)
             
             handler = TimedRotatingFileHandler(
