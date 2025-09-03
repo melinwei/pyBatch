@@ -12,13 +12,13 @@ class SqlParameter:
 
 
 class SqlServerDB:
-    """SQL Server 数据库操作类，支持自动提交和显式事务"""
+    """SQL Server データベース操作クラス、自動コミットと明示的トランザクションをサポート"""
 
     def __init__(self, connection_timeout: int = 30):
         self.connection_string = CommonCode.get_connection_string()
         self.connection_timeout = connection_timeout
         self.conn = None
-        self.in_transaction = False  # 标记是否手动开启了事务
+        self.in_transaction = False  # 手動でトランザクションを開始したかどうかのフラグ
 
     def connect(self) -> None:
         if self.conn is None or self._is_connection_closed():
@@ -26,8 +26,8 @@ class SqlServerDB:
                 self.connection_string,
                 timeout=self.connection_timeout
             )
-            self.conn.autocommit = False   # 统一关闭，手动控制
-            self.in_transaction = False    # 新连接默认非事务模式
+            self.conn.autocommit = False   # 統一してオフにし、手動制御
+            self.in_transaction = False    # 新しい接続はデフォルトで非トランザクションモード
 
     def _is_connection_closed(self) -> bool:
         if self.conn is None:
@@ -43,7 +43,7 @@ class SqlServerDB:
     def close(self) -> None:
         if self.conn:
             try:
-                # 如果还在事务中但没 commit/rollback，自动回滚
+                # トランザクション中でまだcommit/rollbackしていない場合、自動ロールバック
                 if self.in_transaction:
                     self.conn.rollback()
             finally:
@@ -51,15 +51,15 @@ class SqlServerDB:
                 self.conn = None
                 self.in_transaction = False
 
-    # ---------- 事务 ----------
+    # ---------- トランザクション ----------
     def begin_transaction(self) -> None:
-        """开启手动事务"""
+        """手動トランザクションを開始"""
         self.connect()
         self.in_transaction = True
 
     def commit(self) -> None:
         if not self.conn:
-            raise RuntimeError("没有活动的数据库连接")
+            raise RuntimeError("アクティブなデータベース接続がありません")
         self.conn.commit()
         self.in_transaction = False
 
@@ -68,7 +68,7 @@ class SqlServerDB:
             self.conn.rollback()
         self.in_transaction = False
 
-    # ---------- 参数处理 ----------
+    # ---------- パラメータ処理 ----------
     def _convert_named_params(self, sql: str, params: List[SqlParameter]) -> Tuple[str, List[Any]]:
         if not params:
             return sql, []
@@ -88,7 +88,7 @@ class SqlServerDB:
             return self._convert_named_params(sql, params)
         return sql, params
 
-    # ---------- 执行 ----------
+    # ---------- 実行 ----------
     def execute(self, sql: str, params: Optional[Union[List[SqlParameter], Tuple, List, Dict]] = None) -> int:
         self.connect()
         cursor = self.conn.cursor()
@@ -97,7 +97,7 @@ class SqlServerDB:
             cursor.execute(sql, params) if params else cursor.execute(sql)
             affected = cursor.rowcount
 
-            # 如果没有事务，自动提交
+            # トランザクションがない場合、自動コミット
             if not self.in_transaction:
                 self.conn.commit()
 
@@ -134,10 +134,10 @@ class SqlServerDB:
             cursor.close()
 
     def fetch_all_data(self, sql: str, params: Optional[Union[List[SqlParameter], Tuple, List, Dict]] = None) -> pd.DataFrame:
-        """查询多行数据并返回 pandas DataFrame"""
+        """複数行データをクエリしてpandas DataFrameを返す"""
         data = self.fetch_all(sql, params)
         if not data:
-            return pd.DataFrame()  # 空表
+            return pd.DataFrame()  # 空のテーブル
         return pd.DataFrame(data)
 
     def fetch_all_json(self, sql: str, params: Optional[Union[List[SqlParameter], Tuple, List, Dict]] = None) -> List[Dict[str, Any]]:
@@ -145,23 +145,23 @@ class SqlServerDB:
          return df.to_json(orient='records', force_ascii=False)  #
 
 
-# 使用示例
+# 使用例
 if __name__ == "__main__":
     db = SqlServerDB()
     try:
-        # --- 自动提交模式（没调用 begin_transaction）---
+        # --- 自動コミットモード（begin_transactionを呼び出していない）---
         db.execute("INSERT INTO TRN_LOG (LOG_KEY, UPD_USR) VALUES (?, ?)", ("100", "auto"))
-        print("自动提交完成")
+        print("自動コミット完了")
 
-        # --- 手动事务模式 ---
+        # --- 手動トランザクションモード ---
         db.begin_transaction()
         db.execute("INSERT INTO TRN_LOG (LOG_KEY, UPD_USR) VALUES (?, ?)", ("200", "manual"))
         db.execute("UPDATE TRN_LOG SET UPD_USR=? WHERE LOG_KEY=?", ("manual2", "200"))
         db.commit()
-        print("手动事务提交完成")
+        print("手動トランザクションコミット完了")
 
     except Exception as e:
-        print("操作失败:", e)
+        print("操作失敗:", e)
         db.rollback()
     finally:
         db.close()

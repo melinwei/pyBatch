@@ -16,47 +16,47 @@ from dataclasses import dataclass
 
 @dataclass
 class ModelEmailInfo:
-    # 服务器信息
-    smtp_server: str                    # SMTP服务器地址
-    smtp_port: int = 587               # SMTP端口
+    # サーバー情報
+    smtp_server: str                  # SMTPサーバーアドレス
+    smtp_port: int = 587              # SMTPポート
     
-    # 认证信息
-    username: str = ''                 # 邮箱用户名
-    password: str = ''                 # 邮箱密码或应用密码
+    # 認証情報
+    username: str = ''                # メールユーザー名
+    password: str = ''                # メールパスワードまたはアプリパスワード
     
-    # 安全设置
-    use_tls: bool = True              # 使用TLS加密
-    use_ssl: bool = False             # 使用SSL加密
+    # セキュリティ設定
+    use_tls: bool = True              # TLS暗号化を使用
+    use_ssl: bool = False             # SSL暗号化を使用
     
-    # 连接设置
-    timeout: int = 30                 # 连接超时时间
+    # 接続設定
+    timeout: int = 30                 # 接続タイムアウト時間
     
-    # 发送者信息
-    sender_email: str = ''            # 发送者邮箱
-    sender_name: str = ''             # 发送者显示名称
+    # 送信者情報
+    sender_email: str = ''            # 送信者メールアドレス
+    sender_name: str = ''             # 送信者表示名
     
-    # 配置名称
-    config_name: str = ''             # 配置名称，便于管理
+    # 設定名
+    config_name: str = ''             # 設定名、管理しやすくするため
 
 
 class EmailSender:
-    """邮件发送器类，支持文本、HTML邮件和附件发送"""
+    """メール送信器クラス、テキスト、HTMLメールと添付ファイル送信をサポート"""
     
     def __init__(self, email_config: ModelEmailInfo):
         """
-        初始化邮件发送器
+        メール送信器を初期化
         
         Args:
-            email_config: 邮件配置信息
+            email_config: メール設定情報
         """
         self.config = email_config
         self.logger = logging.getLogger(__name__)
         
     def _create_smtp_connection(self) -> smtplib.SMTP:
-        """创建SMTP连接"""
+        """SMTP接続を作成"""
         try:
             if self.config.use_ssl:
-                # 使用SSL连接
+                # SSL接続を使用
                 context = ssl.create_default_context()
                 server = smtplib.SMTP_SSL(
                     self.config.smtp_server, 
@@ -65,7 +65,7 @@ class EmailSender:
                     context=context
                 )
             else:
-                # 使用普通连接
+                # 通常接続を使用
                 server = smtplib.SMTP(
                     self.config.smtp_server, 
                     self.config.smtp_port,
@@ -73,21 +73,21 @@ class EmailSender:
                 )
                 
                 if self.config.use_tls:
-                    # 启用TLS加密
+                    # TLS暗号化を有効化
                     server.starttls()
             
-            # 登录邮箱
+            # メールボックスにログイン
             if self.config.username and self.config.password:
                 server.login(self.config.username, self.config.password)
                 
             return server
             
         except Exception as e:
-            self.logger.error(f"创建SMTP连接失败: {e}")
+            self.logger.error(f"SMTP接続作成失敗: {e}")
             raise
     
     def _get_mime_type_and_subtype(self, file_path: str) -> tuple:
-        """获取文件的MIME类型和子类型"""
+        """ファイルのMIMEタイプとサブタイプを取得"""
         mime_type, _ = mimetypes.guess_type(file_path)
         if mime_type is None:
             return 'application', 'octet-stream'
@@ -96,13 +96,13 @@ class EmailSender:
         return main_type, sub_type
     
     def _add_attachment(self, msg: MIMEMultipart, file_path: str, filename: Optional[str] = None):
-        """添加附件到邮件"""
+        """メールに添付ファイルを追加"""
         try:
             path = Path(file_path)
             if not path.exists():
-                raise FileNotFoundError(f"附件文件不存在: {file_path}")
+                raise FileNotFoundError(f"添付ファイルが存在しません: {file_path}")
             
-            # 使用自定义文件名或原文件名
+            # カスタムファイル名または元のファイル名を使用
             attach_filename = filename or path.name
             main_type, sub_type = self._get_mime_type_and_subtype(file_path)
             
@@ -110,19 +110,19 @@ class EmailSender:
                 file_data = fp.read()
             
             if main_type == 'text':
-                # 文本文件
+                # テキストファイル
                 attachment = MIMEText(file_data.decode('utf-8'), sub_type)
             elif main_type == 'image':
-                # 图片文件
+                # 画像ファイル
                 attachment = MIMEImage(file_data, sub_type)
             elif main_type == 'audio':
-                # 音频文件
+                # 音声ファイル
                 attachment = MIMEAudio(file_data, sub_type)
             else:
-                # 其他类型文件
+                # その他のタイプのファイル
                 attachment = MIMEApplication(file_data, sub_type)
             
-            # 设置附件头信息
+            # 添付ファイルヘッダー情報を設定
             attachment.add_header(
                 'Content-Disposition',
                 'attachment',
@@ -130,10 +130,10 @@ class EmailSender:
             )
             
             msg.attach(attachment)
-            self.logger.info(f"成功添加附件: {attach_filename}")
+            self.logger.info(f"添付ファイル追加成功: {attach_filename}")
             
         except Exception as e:
-            self.logger.error(f"添加附件失败 {file_path}: {e}")
+            self.logger.error(f"添付ファイル追加失敗 {file_path}: {e}")
             raise
     
     def send_email(self, 
@@ -146,53 +146,53 @@ class EmailSender:
                    attachments: Optional[List[Union[str, tuple]]] = None,
                    reply_to: Optional[str] = None) -> bool:
         """
-        发送邮件
+        メールを送信
         
         Args:
-            to_emails: 收件人邮箱地址（字符串或列表）
-            subject: 邮件主题
-            body: 纯文本邮件内容
-            html_body: HTML格式邮件内容
-            cc_emails: 抄送邮箱地址
-            bcc_emails: 密送邮箱地址
-            attachments: 附件列表，可以是文件路径字符串或(文件路径, 显示名称)元组
-            reply_to: 回复邮箱地址
+            to_emails: 受信者メールアドレス（文字列またはリスト）
+            subject: メール件名
+            body: プレーンテキストメール内容
+            html_body: HTML形式メール内容
+            cc_emails: CCメールアドレス
+            bcc_emails: BCCメールアドレス
+            attachments: 添付ファイルリスト、ファイルパス文字列または(ファイルパス, 表示名)タプル
+            reply_to: 返信メールアドレス
             
         Returns:
-            bool: 发送是否成功
+            bool: 送信が成功したかどうか
         """
         try:
-            # 创建邮件对象
+            # メールオブジェクトを作成
             msg = MIMEMultipart('alternative')
             
-            # 设置邮件头信息
+            # メールヘッダー情報を設定
             sender_info = f"{self.config.sender_name} <{self.config.sender_email}>" if self.config.sender_name else self.config.sender_email
             msg['From'] = sender_info
             msg['Subject'] = subject
             
-            # 处理收件人
+            # 受信者を処理
             if isinstance(to_emails, str):
                 to_emails = [to_emails]
             msg['To'] = ', '.join(to_emails)
             
-            # 处理抄送
+            # CCを処理
             if cc_emails:
                 if isinstance(cc_emails, str):
                     cc_emails = [cc_emails]
                 msg['Cc'] = ', '.join(cc_emails)
                 to_emails.extend(cc_emails)
             
-            # 处理密送
+            # BCCを処理
             if bcc_emails:
                 if isinstance(bcc_emails, str):
                     bcc_emails = [bcc_emails]
                 to_emails.extend(bcc_emails)
             
-            # 设置回复地址
+            # 返信アドレスを設定
             if reply_to:
                 msg['Reply-To'] = reply_to
             
-            # 添加邮件内容
+            # メール内容を追加
             if body:
                 text_part = MIMEText(body, 'plain', 'utf-8')
                 msg.attach(text_part)
@@ -201,31 +201,31 @@ class EmailSender:
                 html_part = MIMEText(html_body, 'html', 'utf-8')
                 msg.attach(html_part)
             
-            # 如果既没有纯文本也没有HTML内容，添加默认内容
+            # プレーンテキストもHTML内容もない場合、デフォルト内容を追加
             if not body and not html_body:
                 default_text = MIMEText('', 'plain', 'utf-8')
                 msg.attach(default_text)
             
-            # 添加附件
+            # 添付ファイルを追加
             if attachments:
                 for attachment in attachments:
                     if isinstance(attachment, tuple):
-                        # (文件路径, 显示名称)
+                        # (ファイルパス, 表示名)
                         file_path, display_name = attachment
                         self._add_attachment(msg, file_path, display_name)
                     else:
-                        # 文件路径字符串
+                        # ファイルパス文字列
                         self._add_attachment(msg, attachment)
             
-            # 发送邮件
+            # メールを送信
             with self._create_smtp_connection() as server:
                 text = msg.as_string()
                 server.sendmail(self.config.sender_email, to_emails, text)
-                self.logger.info(f"邮件发送成功: {subject} -> {', '.join(to_emails)}")
+                self.logger.info(f"メール送信成功: {subject} -> {', '.join(to_emails)}")
                 return True
                 
         except Exception as e:
-            self.logger.error(f"邮件发送失败: {e}")
+            self.logger.error(f"メール送信失敗: {e}")
             return False
     
     def send_simple_email(self, 
@@ -233,35 +233,35 @@ class EmailSender:
                          subject: str, 
                          body: str) -> bool:
         """
-        发送简单的纯文本邮件
+        シンプルなプレーンテキストメールを送信
         
         Args:
-            to_email: 收件人邮箱
-            subject: 邮件主题
-            body: 邮件内容
+            to_email: 受信者メールアドレス
+            subject: メール件名
+            body: メール内容
             
         Returns:
-            bool: 发送是否成功
+            bool: 送信が成功したかどうか
         """
         return self.send_email(to_email, subject, body)
     
     def test_connection(self) -> bool:
-        """测试SMTP连接"""
+        """SMTP接続をテスト"""
         try:
             with self._create_smtp_connection() as server:
-                self.logger.info("SMTP连接测试成功")
+                self.logger.info("SMTP接続テスト成功")
                 return True
         except Exception as e:
-            self.logger.error(f"SMTP连接测试失败: {e}")
+            self.logger.error(f"SMTP接続テスト失敗: {e}")
             return False
 
 
-# 使用示例
+# 使用例
 if __name__ == "__main__":
-    # 配置日志
+    # ログを設定
     logging.basicConfig(level=logging.INFO)
     
-    # 创建邮件配置（示例配置）
+    # メール設定を作成（例設定）
     email_config = ModelEmailInfo(
         smtp_server="smtp.gmail.com",
         smtp_port=587,
@@ -269,32 +269,32 @@ if __name__ == "__main__":
         password="your_password",
         use_tls=True,
         sender_email="your_email@gmail.com",
-        sender_name="发送者名称",
-        config_name="Gmail配置"
+        sender_name="送信者名",
+        config_name="Gmail設定"
     )
     
-    # 创建邮件发送器
+    # メール送信器を作成
     sender = EmailSender(email_config)
     
-    # 测试连接
+    # 接続をテスト
     if sender.test_connection():
-        print("连接测试成功！")
+        print("接続テスト成功！")
         
-        # 发送带附件的邮件
+        # 添付ファイル付きメールを送信
         success = sender.send_email(
             to_emails=["recipient@example.com"],
-            subject="测试邮件",
-            body="这是纯文本内容",
-            html_body="<h1>这是HTML内容</h1><p>支持HTML格式</p>",
+            subject="テストメール",
+            body="これはプレーンテキスト内容です",
+            html_body="<h1>これはHTML内容です</h1><p>HTML形式をサポート</p>",
             attachments=[
-                "document.pdf",  # 简单文件路径
-                ("image.jpg", "我的图片.jpg"),  # 自定义显示名称
+                "document.pdf",  # シンプルファイルパス
+                ("image.jpg", "私の画像.jpg"),  # カスタム表示名
             ]
         )
         
         if success:
-            print("邮件发送成功！")
+            print("メール送信成功！")
         else:
-            print("邮件发送失败！")
+            print("メール送信失敗！")
     else:
-        print("连接测试失败！")
+        print("接続テスト失敗！")

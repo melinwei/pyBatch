@@ -16,7 +16,7 @@ class CommonCode:
                 cls._config = configparser.ConfigParser()
                 cls._config.read(cls._config_file, encoding='utf-8')
             else:
-                raise FileNotFoundError(f"❌ 配置文件 {cls._config_file} 不存在")
+                raise FileNotFoundError(f"❌ 設定ファイル {cls._config_file} が存在しません")
 
     @classmethod
     def get_connection_string(cls):
@@ -36,26 +36,26 @@ class CommonCode:
     @classmethod
     def init_logger(cls, log_file='appLog.log', level=logging.INFO, backup_count=7, base_log_dir='log'):
         """
-        初始化日志器，将日志文件保存到按日期命名的文件夹中
+        ロガーを初期化し、ログファイルを日付で命名されたフォルダに保存する
         
         Args:
-            log_file: 日志文件名，默认 'applog.log'
-            level: 日志级别，默认 logging.INFO
-            backup_count: 备份文件数量，默认 7
-            base_log_dir: 基础日志目录，默认 'log'
+            log_file: ログファイル名、デフォルト 'applog.log'
+            level: ログレベル、デフォルト logging.INFO
+            backup_count: バックアップファイル数、デフォルト 7
+            base_log_dir: 基本ログディレクトリ、デフォルト 'log'
         """
         logger = logging.getLogger("CommonLogger")
         logger.setLevel(level)
     
         if not logger.handlers:
-            # 获取当前日期作为文件夹名
+            # 現在の日付をフォルダ名として取得
             today = datetime.now().strftime('%Y%m%d')
             log_dir = os.path.join(base_log_dir, today)
             
-            # 创建日期文件夹（如果不存在）
+            # 日付フォルダを作成（存在しない場合）
             os.makedirs(log_dir, exist_ok=True)
             
-            # 完整的日志文件路径
+            # 完全なログファイルパス
             log_path = os.path.join(log_dir, log_file)
             
             handler = TimedRotatingFileHandler(

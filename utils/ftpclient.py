@@ -7,27 +7,27 @@ from pathlib import Path
 
 @dataclass
 class ModelFtpInfo:
-    # 服务器信息
-    ftp_server: str                    # FTP服务器地址
-    ftp_port: int = 21                 # FTP端口
+    # サーバー情報
+    ftp_server: str                    # FTPサーバーアドレス
+    ftp_port: int = 21                 # FTPポート
     
-    # 认证信息
-    username: str = ''                 # FTP用户名
-    password: str = ''                 # FTP密码
+    # 認証情報
+    username: str = ''                 # FTPユーザー名
+    password: str = ''                 # FTPパスワード
     
-    # 安全设置
-    use_tls: bool = False              # 使用FTPS加密
-    passive_mode: bool = True          # 被动模式
+    # セキュリティ設定
+    use_tls: bool = False              # FTPS暗号化を使用
+    passive_mode: bool = True          # パッシブモード
     
-    # 连接设置
-    timeout: int = 30                  # 连接超时时间
+    # 接続設定
+    timeout: int = 30                  # 接続タイムアウト時間
     
-    # 工作目录
-    remote_dir: str = '/'              # 远程工作目录
-    local_dir: str = './'              # 本地工作目录
+    # 作業ディレクトリ
+    remote_dir: str = '/'              # リモート作業ディレクトリ
+    local_dir: str = './'              # ローカル作業ディレクトリ
     
-    # 配置名称
-    config_name: str = ''              # 配置名称，便于管理
+    # 設定名
+    config_name: str = ''              # 設定名、管理用
 
 
 class FtpClient:
@@ -36,41 +36,41 @@ class FtpClient:
         self.ftp = None
     
     def connect(self) -> bool:
-        """连接到FTP服务器"""
+        """FTPサーバーに接続"""
         try:
             if self.config.use_tls:
                 self.ftp = FTP_TLS()
             else:
                 self.ftp = FTP()
             
-            # 设置超时
+            # タイムアウト設定
             self.ftp.timeout = self.config.timeout
             
-            # 连接服务器
+            # サーバーに接続
             self.ftp.connect(self.config.ftp_server, self.config.ftp_port)
             
-            # 登录
+            # ログイン
             self.ftp.login(self.config.username, self.config.password)
             
-            # 如果使用TLS，需要设置数据连接保护
+            # TLS使用時、データ接続保護を設定
             if self.config.use_tls:
                 self.ftp.prot_p()
             
-            # 设置被动模式
+            # パッシブモード設定
             self.ftp.set_pasv(self.config.passive_mode)
             
-            # 切换到工作目录
+            # 作業ディレクトリに移動
             if self.config.remote_dir != '/':
                 self.ftp.cwd(self.config.remote_dir)
             
             return True
             
         except Exception as e:
-            print(f"连接失败: {e}")
+            print(f"接続失敗: {e}")
             return False
     
     def disconnect(self):
-        """断开FTP连接"""
+        """FTP接続を切断"""
         if self.ftp:
             try:
                 self.ftp.quit()
@@ -80,179 +80,179 @@ class FtpClient:
     
     def upload_file(self, local_path: str, remote_filename: Optional[str] = None) -> bool:
         """
-        上传文件
+        ファイルをアップロード
         
         Args:
-            local_path: 本地文件路径
-            remote_filename: 远程文件名，如果不指定则使用本地文件名
+            local_path: ローカルファイルパス
+            remote_filename: リモートファイル名、指定しない場合はローカルファイル名を使用
         
         Returns:
-            bool: 上传是否成功
+            bool: アップロード成功かどうか
         """
         if not self.ftp:
-            print("未连接到FTP服务器")
+            print("FTPサーバーに接続されていません")
             return False
         
         try:
             local_file = Path(local_path)
             if not local_file.exists():
-                print(f"本地文件不存在: {local_path}")
+                print(f"ローカルファイルが存在しません: {local_path}")
                 return False
             
-            # 确定远程文件名
+            # リモートファイル名を決定
             if remote_filename is None:
                 remote_filename = local_file.name
             
-            # 上传文件
+            # ファイルをアップロード
             with open(local_path, 'rb') as file:
                 self.ftp.storbinary(f'STOR {remote_filename}', file)
             
-            print(f"上传成功: {local_path} -> {remote_filename}")
+            print(f"アップロード成功: {local_path} -> {remote_filename}")
             return True
             
         except Exception as e:
-            print(f"上传失败: {e}")
+            print(f"アップロード失敗: {e}")
             return False
     
     def upload_string(self, content: str, remote_filename: str, encoding: str = 'utf-8') -> bool:
         """
-        直接上传字符串内容到远程文件
+        文字列コンテンツを直接リモートファイルにアップロード
         
         Args:
-            content: 要上传的字符串内容
-            remote_filename: 远程文件名
-            encoding: 文件编码，默认为utf-8
+            content: アップロードする文字列コンテンツ
+            remote_filename: リモートファイル名
+            encoding: ファイルエンコーディング、デフォルトはutf-8
         
         Returns:
-            bool: 上传是否成功
+            bool: アップロード成功かどうか
         """
         if not self.ftp:
-            print("未连接到FTP服务器")
+            print("FTPサーバーに接続されていません")
             return False
         
         try:
             from io import BytesIO
             
-            # 将字符串编码为字节并创建内存缓冲区
+            # 文字列をバイトにエンコードしてメモリバッファを作成
             content_bytes = content.encode(encoding)
             buffer = BytesIO(content_bytes)
             
-            # 上传内容
+            # コンテンツをアップロード
             self.ftp.storbinary(f'STOR {remote_filename}', buffer)
             
-            print(f"字符串上传成功: {remote_filename} (大小: {len(content_bytes)} 字节)")
+            print(f"文字列アップロード成功: {remote_filename} (サイズ: {len(content_bytes)} バイト)")
             return True
             
         except Exception as e:
-            print(f"字符串上传失败: {e}")
+            print(f"文字列アップロード失敗: {e}")
             return False
     
     def download_file(self, remote_filename: str, local_path: Optional[str] = None) -> bool:
         """
-        下载文件
+        ファイルをダウンロード
         
         Args:
-            remote_filename: 远程文件名
-            local_path: 本地保存路径，如果不指定则保存到本地工作目录
+            remote_filename: リモートファイル名
+            local_path: ローカル保存パス、指定しない場合はローカル作業ディレクトリに保存
         
         Returns:
-            bool: 下载是否成功
+            bool: ダウンロード成功かどうか
         """
         if not self.ftp:
-            print("未连接到FTP服务器")
+            print("FTPサーバーに接続されていません")
             return False
         
         try:
-            # 确定本地保存路径
+            # ローカル保存パスを決定
             if local_path is None:
                 local_path = os.path.join(self.config.local_dir, remote_filename)
             
-            # 确保本地目录存在
+            # ローカルディレクトリが存在することを確認
             local_dir = os.path.dirname(local_path)
             if local_dir:
                 os.makedirs(local_dir, exist_ok=True)
             
-            # 下载文件
+            # ファイルをダウンロード
             with open(local_path, 'wb') as file:
                 self.ftp.retrbinary(f'RETR {remote_filename}', file.write)
             
-            print(f"下载成功: {remote_filename} -> {local_path}")
+            print(f"ダウンロード成功: {remote_filename} -> {local_path}")
             return True
             
         except Exception as e:
-            print(f"下载失败: {e}")
+            print(f"ダウンロード失敗: {e}")
             return False
     
     def delete_file(self, remote_filename: str) -> bool:
         """
-        删除远程文件
+        リモートファイルを削除
         
         Args:
-            remote_filename: 要删除的远程文件名
+            remote_filename: 削除するリモートファイル名
         
         Returns:
-            bool: 删除是否成功
+            bool: 削除成功かどうか
         """
         if not self.ftp:
-            print("未连接到FTP服务器")
+            print("FTPサーバーに接続されていません")
             return False
         
         try:
             self.ftp.delete(remote_filename)
-            print(f"删除成功: {remote_filename}")
+            print(f"削除成功: {remote_filename}")
             return True
             
         except Exception as e:
-            print(f"删除失败: {e}")
+            print(f"削除失敗: {e}")
             return False
     
     def read_file(self, remote_filename: str, encoding: str = 'utf-8') -> Optional[str]:
         """
-        直接读取远程文件内容并返回字符串
+        リモートファイルの内容を直接読み取って文字列を返す
         
         Args:
-            remote_filename: 远程文件名
-            encoding: 文件编码，默认为utf-8
+            remote_filename: リモートファイル名
+            encoding: ファイルエンコーディング、デフォルトはutf-8
         
         Returns:
-            Optional[str]: 文件内容字符串，失败时返回None
+            Optional[str]: ファイル内容文字列、失敗時はNone
         """
         if not self.ftp:
-            print("未连接到FTP服务器")
+            print("FTPサーバーに接続されていません")
             return None
         
         try:
             from io import BytesIO
             
-            # 创建内存缓冲区
+            # メモリバッファを作成
             buffer = BytesIO()
             
-            # 将文件内容读取到缓冲区
+            # ファイル内容をバッファに読み取り
             self.ftp.retrbinary(f'RETR {remote_filename}', buffer.write)
             
-            # 获取缓冲区内容并解码为字符串
+            # バッファ内容を取得して文字列にデコード
             buffer.seek(0)
             content = buffer.read().decode(encoding)
             
-            print(f"读取文件成功: {remote_filename}")
+            print(f"ファイル読み取り成功: {remote_filename}")
             return content
             
         except Exception as e:
-            print(f"读取文件失败: {e}")
+            print(f"ファイル読み取り失敗: {e}")
             return None
     
     def get_file_list(self, path: str = '.') -> List[str]:
         """
-        获取文件列表
+        ファイルリストを取得
         
         Args:
-            path: 要列出的目录路径，默认为当前目录
+            path: リスト表示するディレクトリパス、デフォルトは現在のディレクトリ
         
         Returns:
-            List[str]: 文件名列表
+            List[str]: ファイル名リスト
         """
         if not self.ftp:
-            print("未连接到FTP服务器")
+            print("FTPサーバーに接続されていません")
             return []
         
         try:
@@ -261,21 +261,21 @@ class FtpClient:
             return file_list
             
         except Exception as e:
-            print(f"获取文件列表失败: {e}")
+            print(f"ファイルリスト取得失敗: {e}")
             return []
     
     def get_detailed_list(self, path: str = '.') -> List[str]:
         """
-        获取详细文件列表（包含权限、大小、日期等信息）
+        詳細ファイルリストを取得（権限、サイズ、日付などの情報を含む）
         
         Args:
-            path: 要列出的目录路径，默认为当前目录
+            path: リスト表示するディレクトリパス、デフォルトは現在のディレクトリ
         
         Returns:
-            List[str]: 详细文件信息列表
+            List[str]: 詳細ファイル情報リスト
         """
         if not self.ftp:
-            print("未连接到FTP服务器")
+            print("FTPサーバーに接続されていません")
             return []
         
         try:
@@ -284,60 +284,60 @@ class FtpClient:
             return detailed_list
             
         except Exception as e:
-            print(f"获取详细文件列表失败: {e}")
+            print(f"詳細ファイルリスト取得失敗: {e}")
             return []
     
     def change_dir(self, path: str) -> bool:
         """
-        切换远程目录
+        リモートディレクトリを変更
         
         Args:
-            path: 目标目录路径
+            path: ターゲットディレクトリパス
         
         Returns:
-            bool: 切换是否成功
+            bool: 変更成功かどうか
         """
         if not self.ftp:
-            print("未连接到FTP服务器")
+            print("FTPサーバーに接続されていません")
             return False
         
         try:
             self.ftp.cwd(path)
             return True
             
-        except Exception as e:
-            print(f"切换目录失败: {e}")
+        except (OSError, EOFError) as e:
+            print(f"ディレクトリ変更失敗: {e}")
             return False
     
     def get_current_dir(self) -> str:
         """
-        获取当前远程目录
+        現在のリモートディレクトリを取得
         
         Returns:
-            str: 当前目录路径
+            str: 現在のディレクトリパス
         """
         if not self.ftp:
             return ""
         
         try:
             return self.ftp.pwd()
-        except Exception as e:
-            print(f"获取当前目录失败: {e}")
+        except (OSError, EOFError) as e:
+            print(f"現在のディレクトリ取得失敗: {e}")
             return ""
     
     def __enter__(self):
-        """支持with语句的上下文管理器"""
+        """with文のコンテキストマネージャーをサポート"""
         self.connect()
         return self
     
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """支持with语句的上下文管理器"""
+        """with文のコンテキストマネージャーをサポート"""
         self.disconnect()
 
 
-# 使用示例
+# 使用例
 if __name__ == "__main__":
-    # 创建FTP配置
+    # FTP設定を作成
     ftp_config = ModelFtpInfo(
         ftp_server="ftp.example.com",
         ftp_port=21,
@@ -346,38 +346,38 @@ if __name__ == "__main__":
         use_tls=False,
         remote_dir="/upload",
         local_dir="./downloads",
-        config_name="示例FTP配置"
+        config_name="サンプルFTP設定"
     )
     
-    # 使用方式1：手动管理连接
+    # 使用方法1：手動で接続管理
     client = FtpClient(ftp_config)
     if client.connect():
-        # 获取文件列表
+        # ファイルリストを取得
         files = client.get_file_list()
-        print("文件列表:", files)
+        print("ファイルリスト:", files)
         
-        # 上传文件
+        # ファイルをアップロード
         # client.upload_file("local_file.txt")
         
-        # 下载文件
+        # ファイルをダウンロード
         # client.download_file("remote_file.txt")
         
-        # 读取文件内容
+        # ファイル内容を読み取り
         # content = client.read_file("remote_file.txt")
-        # print("文件内容:", content)
+        # print("ファイル内容:", content)
         
         client.disconnect()
     
-    # 使用方式2：使用with语句（推荐）
+    # 使用方法2：with文を使用（推奨）
     with FtpClient(ftp_config) as client:
         files = client.get_file_list()
-        print("文件列表:", files)
+        print("ファイルリスト:", files)
         
-        # 直接上传CSV字符串
+        # CSV文字列を直接アップロード
         # csv_data = "姓名,年龄,城市\n张三,25,北京\n李四,30,上海\n王五,28,广州"
         # client.upload_string(csv_data, "employees.csv", encoding="utf-8")
         
-        # 直接读取文件内容
+        # ファイル内容を直接読み取り
         # content = client.read_file("config.txt", encoding="utf-8")
         # if content:
-        #     print("文件内容:", content)
+        #     print("ファイル内容:", content)
